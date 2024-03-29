@@ -115,9 +115,9 @@ begin
 	emispec = ones(length(v_space))
 	for (i,vz) in enumerate(v_space)
 		for j in 1:length(v)
-			if vz < -v[j]*cosd(θ_crit_emi[j]) 
+			if vz > v[j]*cosd(θ_crit_emi[j]) ## && vz < -v[j]*cosd(θ_crit_emi[j])
 				println(v[j]*cosd(θ_crit_emi[j]))
-				emispec[i] += 0.1
+				emispec[i] += 0.01 #*ρ[j]
 			end
 		end
 	end
