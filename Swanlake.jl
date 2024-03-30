@@ -94,7 +94,7 @@ end
 
 # ╔═╡ 671c3591-6885-4c75-b16d-4221004bce39
 # r = 10 .^ range(0, stop=4, length=101)
-r = collect(1:0.01:100)
+r = collect(1:0.005:1000)
 
 # ╔═╡ 52be22c2-3817-4c6f-b270-04447b5da0ae
 begin
@@ -105,6 +105,7 @@ end
 # ╔═╡ 2cecfef4-de78-4d5e-9bf3-18dea4d8d0c3
 begin
 	plot_v = plot(r,v,xaxis=:log,background_color=:black)
+	hspan!([v∞,v∞+0.1])
 	plot_ρ = plot(r,ρ,xaxis=:log,yaxis=:log,background_color=:black)
 	plot(plot_v, plot_ρ, layout = (1, 2), legend = false,background_color=:black)
 end
@@ -137,7 +138,7 @@ begin
 	for (i,vz) in enumerate(v_space)
 		for j in 1:length(v)
 			if vz < -v[j]*cosd(θ_crit_abs[j]) && vz > -v[j]
-				absspec[i] -= 10#exp(-ρ[j])
+				absspec[i] -= 100#exp(-ρ[j])
 			end
 		end
 	end
