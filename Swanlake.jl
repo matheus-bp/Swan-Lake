@@ -37,7 +37,7 @@ The density $\rho(r)$ is established through the mass conservation: $\dot{M} = 4
 """
 
 # ╔═╡ b626f40d-e9fb-41c0-830d-7636a716cee7
-@bind β Slider(0.5:0.1:7, show_value=true)
+@bind β Slider(0.5:0.1:4, show_value=true)
 
 # ╔═╡ 3d17748e-537a-47c9-b4f2-fa3b55eccf70
 @bind v∞ Slider(100:2000, show_value=true)
@@ -57,7 +57,7 @@ md"""
 
 # ╔═╡ a8a79526-aa33-400d-b889-a7a2e76eac93
 begin
-	v_space = range(-3000,3000,300)
+	v_space = collect(-3000:60:3000)
 end
 
 # ╔═╡ 8b9675b7-dd7f-413f-98c6-04ca6995d1eb
@@ -67,8 +67,15 @@ mutable struct Windshell
 	emissivity
 end
 
-# ╔═╡ e510fe5d-72ce-4b62-8115-c1274283beee
-print(length(v_space))
+# ╔═╡ 96565d3a-fdeb-41b9-988e-1af01b9733fc
+md"""
+### The absorption component
+"""
+
+# ╔═╡ 69664117-3bb0-4dd4-afda-eebf0073cbab
+md"""
+### The sexy P Cygni profile!
+"""
 
 # ╔═╡ 41227558-db4f-434b-930e-aefb9d3edaa2
 md"""
@@ -86,7 +93,8 @@ function dens(r,v,dₜM)
 end
 
 # ╔═╡ 671c3591-6885-4c75-b16d-4221004bce39
-r = 10 .^ range(0, stop=4, length=51)
+# r = 10 .^ range(0, stop=4, length=101)
+r = collect(1:0.01:100)
 
 # ╔═╡ 52be22c2-3817-4c6f-b270-04447b5da0ae
 begin
@@ -107,21 +115,42 @@ Rstar = 1
 # ╔═╡ 06a195de-a9e9-4aa1-896b-df4eb9ac6632
 θ_crit_emi = 180 .- asind.(Rstar./r) #ArcSIN in Degrees
 
-# ╔═╡ 5ac40490-7df6-451e-93c4-69c85e7b2b0b
-plot(θ_crit_emi,background_color=:black)
-
 # ╔═╡ 7e1ba257-6a74-4008-9546-5f5bd501fd96
 begin
 	emispec = ones(length(v_space))
 	for (i,vz) in enumerate(v_space)
 		for j in 1:length(v)
-			if vz > v[j]*cosd(θ_crit_emi[j]) ## && vz < -v[j]*cosd(θ_crit_emi[j])
-				println(v[j]*cosd(θ_crit_emi[j]))
-				emispec[i] += 0.01 #*ρ[j]
+			if vz > v[j]*cosd(θ_crit_emi[j]) && vz < v[j]
+				emispec[i] += 0.01 #exp(-ρ[j])
 			end
 		end
 	end
-	plot(v_space,emispec,bg=:black)
+	plot(v_space,emispec,c=:lime,bg=:black)
+end
+
+# ╔═╡ d807e439-7750-49e5-98e3-2bccce1b99ce
+θ_crit_abs = asind.(Rstar./r) #ArcSIN in Degrees
+
+# ╔═╡ 8690f664-1b30-41c8-8af8-fa6a94d5b7a1
+begin
+	absspec = ones(length(v_space))
+	for (i,vz) in enumerate(v_space)
+		for j in 1:length(v)
+			if vz < -v[j]*cosd(θ_crit_abs[j]) && vz > -v[j]
+				absspec[i] -= 10#exp(-ρ[j])
+			end
+		end
+	end
+	plot(v_space,absspec,c=:fuchsia,bg=:black)
+end
+
+# ╔═╡ df76de07-8c02-40d6-a468-9fcd8be85172
+begin
+	pcygspec = emispec .+ absspec
+
+	plot(v_space,emispec,lw=0.7,c=:lime,alpha=0.2,ls=:dash,bg=:black)
+	plot!(v_space,absspec,lw=1,c=:fuchsia,alpha=0.2,ls=:dot,bg=:black)
+	plot!(v_space,pcygspec,lw=3,c=:blue,bg=:black)
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -1328,9 +1357,12 @@ version = "1.4.1+1"
 # ╠═a8a79526-aa33-400d-b889-a7a2e76eac93
 # ╠═8b9675b7-dd7f-413f-98c6-04ca6995d1eb
 # ╠═06a195de-a9e9-4aa1-896b-df4eb9ac6632
-# ╠═5ac40490-7df6-451e-93c4-69c85e7b2b0b
-# ╠═e510fe5d-72ce-4b62-8115-c1274283beee
 # ╠═7e1ba257-6a74-4008-9546-5f5bd501fd96
+# ╠═96565d3a-fdeb-41b9-988e-1af01b9733fc
+# ╠═d807e439-7750-49e5-98e3-2bccce1b99ce
+# ╠═8690f664-1b30-41c8-8af8-fa6a94d5b7a1
+# ╠═69664117-3bb0-4dd4-afda-eebf0073cbab
+# ╠═df76de07-8c02-40d6-a468-9fcd8be85172
 # ╟─41227558-db4f-434b-930e-aefb9d3edaa2
 # ╠═2e8ed24c-47ab-4027-9b40-8538c6c24dd8
 # ╠═52be22c2-3817-4c6f-b270-04447b5da0ae
