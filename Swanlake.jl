@@ -131,7 +131,11 @@ begin
 end
 
 # ╔═╡ 631b66b0-ef3c-4ab4-b0ef-f2bbc2cf5b76
-plot(log10.(r.-1),τ,bg=:black,yaxis=:log)
+begin
+	p1 = plot(log10.(r.-1),τ,yaxis=:log,bg=:black)
+	p2 = plot(log10.(r),τ,yaxis=:log,bg=:black)
+	plot(p1,p2,layout=(1,2))
+end
 
 # ╔═╡ ddae4873-f934-48e9-ba0e-00359dfbfe5f
 Rstar = 1
@@ -161,7 +165,7 @@ begin
 	for (i,vz) in enumerate(v_space)
 		for j in 1:length(v)
 			if vz < -v[j]*cosd(θ_crit_abs[j]) && vz > -v[j]
-				absspec[i] -= 100#exp(-ρ[j])
+				absspec[i] -= 200 .* exp(-τ[end:-1:1][j] .* 1e15) #100#exp(-ρ[j])
 			end
 		end
 	end
