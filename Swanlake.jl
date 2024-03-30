@@ -82,6 +82,17 @@ md"""
 ---
 """
 
+# ╔═╡ fec38576-f2da-47ac-8204-dbf8b1112d52
+function taul(κ,ρ,r,r0)
+	if r0 ∈ r
+		i = findfirst(x->x==r0,r)
+		# taul = κ  * sum(r[end:-1:i]' * ρ[end:-1:i])
+		taul = κ  * sum(ρ[end:-1:i])
+	else
+		print("r value not found")
+	end
+end
+
 # ╔═╡ 0d0e415c-edeb-11ee-24c6-656802435014
 function velo(r,v∞,β;v₀ = 0.01,Rstar=1)
 	velo = v₀ .+ (v∞-v₀) .* (1 .- Rstar./r).^β
@@ -110,6 +121,17 @@ begin
 	plot(plot_v, plot_ρ, layout = (1, 2), legend = false,background_color=:black)
 	plot!(size=(1000,400))
 end
+
+# ╔═╡ 9ad1c424-969c-473e-878c-a7e404b42b39
+begin
+	τ = zeros(length(r))
+	for (i,r0) in enumerate(r)
+		τ[i] += taul(1e-7,ρ,r,r0)
+	end
+end
+
+# ╔═╡ 631b66b0-ef3c-4ab4-b0ef-f2bbc2cf5b76
+plot(log10.(r.-1),τ,bg=:black,yaxis=:log)
 
 # ╔═╡ ddae4873-f934-48e9-ba0e-00359dfbfe5f
 Rstar = 1
@@ -1431,6 +1453,9 @@ version = "1.4.1+1"
 # ╟─41227558-db4f-434b-930e-aefb9d3edaa2
 # ╠═2e8ed24c-47ab-4027-9b40-8538c6c24dd8
 # ╠═52be22c2-3817-4c6f-b270-04447b5da0ae
+# ╠═9ad1c424-969c-473e-878c-a7e404b42b39
+# ╠═631b66b0-ef3c-4ab4-b0ef-f2bbc2cf5b76
+# ╠═fec38576-f2da-47ac-8204-dbf8b1112d52
 # ╠═0d0e415c-edeb-11ee-24c6-656802435014
 # ╠═f710858e-b28a-436d-b851-e3a950fbb3f1
 # ╠═671c3591-6885-4c75-b16d-4221004bce39
