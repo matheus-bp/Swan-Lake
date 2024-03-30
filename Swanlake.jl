@@ -82,16 +82,31 @@ md"""
 ---
 """
 
+# ╔═╡ 9ad1c424-969c-473e-878c-a7e404b42b39
+# begin
+# 	τ = zeros(length(r))
+# 	for (i,r0) in enumerate(r)
+# 		τ[i] += taul(1e-7,ρ,r,r0)
+# 	end
+# end
+
+# ╔═╡ 631b66b0-ef3c-4ab4-b0ef-f2bbc2cf5b76
+# begin
+# 	p1 = plot(log10.(r),exp(-τ),yaxis=:log,bg=:black)
+# 	p2 = plot(log10.(r),τ,yaxis=:log,bg=:black)
+# 	plot(p1,p2,layout=(1,2))
+# end
+
 # ╔═╡ fec38576-f2da-47ac-8204-dbf8b1112d52
-function taul(κ,ρ,r,r0)
-	if r0 ∈ r
-		i = findfirst(x->x==r0,r)
-		# taul = κ  * sum(r[end:-1:i]' * ρ[end:-1:i])
-		taul = κ  * sum(ρ[end:-1:i])
-	else
-		print("r value not found")
-	end
-end
+# function taul(κ,ρ,r,r0)
+# 	if r0 ∈ r
+# 		i = findfirst(x->x==r0,r)
+# 		# taul = κ  * sum(r[end:-1:i]' * ρ[end:-1:i])
+# 		# taul = κ  * sum(ρ[i:1:end])
+# 	else
+# 		print("r value not found")
+# 	end
+# end
 
 # ╔═╡ 0d0e415c-edeb-11ee-24c6-656802435014
 function velo(r,v∞,β;v₀ = 0.01,Rstar=1)
@@ -106,6 +121,12 @@ end
 # ╔═╡ 671c3591-6885-4c75-b16d-4221004bce39
 # r = 10 .^ range(0, stop=4, length=101)
 r = collect(1:0.005:1000)
+
+# ╔═╡ 0287f1d7-044b-4726-a894-fa1d0734ac43
+begin
+	emilaw = 40 .* r.^-3
+	abslaw = 200 .* r.^-2 + 1e2.*exp.(1 .-r) #200 .* exp(-τ2[j] * 1e15) #100#exp(-ρ[j])
+end
 
 # ╔═╡ 52be22c2-3817-4c6f-b270-04447b5da0ae
 begin
@@ -122,21 +143,6 @@ begin
 	plot!(size=(1000,400))
 end
 
-# ╔═╡ 9ad1c424-969c-473e-878c-a7e404b42b39
-begin
-	τ = zeros(length(r))
-	for (i,r0) in enumerate(r)
-		τ[i] += taul(1e-7,ρ,r,r0)
-	end
-end
-
-# ╔═╡ 631b66b0-ef3c-4ab4-b0ef-f2bbc2cf5b76
-begin
-	p1 = plot(log10.(r.-1),τ,yaxis=:log,bg=:black)
-	p2 = plot(log10.(r),τ,yaxis=:log,bg=:black)
-	plot(p1,p2,layout=(1,2))
-end
-
 # ╔═╡ ddae4873-f934-48e9-ba0e-00359dfbfe5f
 Rstar = 1
 
@@ -149,7 +155,7 @@ begin
 	for (i,vz) in enumerate(v_space)
 		for j in 1:length(v)
 			if vz > v[j]*cosd(θ_crit_emi[j]) && vz < v[j]
-				emispec[i] += 0.01 #exp(-ρ[j])
+				emispec[i] += emilaw[j] #0.003 * exp(ρ[j])#200 .* exp(-τ[end:-1:1][j] .* 1e15)
 			end
 		end
 	end
@@ -165,7 +171,7 @@ begin
 	for (i,vz) in enumerate(v_space)
 		for j in 1:length(v)
 			if vz < -v[j]*cosd(θ_crit_abs[j]) && vz > -v[j]
-				absspec[i] -= 200 .* exp(-τ[end:-1:1][j] .* 1e15) #100#exp(-ρ[j])
+				absspec[i] -= abslaw[j]
 			end
 		end
 	end
@@ -176,7 +182,7 @@ end
 begin
 	pcygspec = emispec .+ absspec
 
-	plot(bg=:black)
+	plot(bg=:black,yaxis=false)
 	plot!(v_space,emispec,lw=0.7,c=:lime,alpha=0.3,ls=:dash,label="emission component")
 	plot!(v_space,absspec,lw=1,c=:fuchsia,alpha=0.3,ls=:dot,label="absorption component")
 	plot!(v_space,pcygspec,lw=3,c=:blue, label="P-Cygni profile")
@@ -1453,7 +1459,8 @@ version = "1.4.1+1"
 # ╠═d807e439-7750-49e5-98e3-2bccce1b99ce
 # ╠═8690f664-1b30-41c8-8af8-fa6a94d5b7a1
 # ╠═69664117-3bb0-4dd4-afda-eebf0073cbab
-# ╟─df76de07-8c02-40d6-a468-9fcd8be85172
+# ╠═df76de07-8c02-40d6-a468-9fcd8be85172
+# ╠═0287f1d7-044b-4726-a894-fa1d0734ac43
 # ╟─41227558-db4f-434b-930e-aefb9d3edaa2
 # ╠═2e8ed24c-47ab-4027-9b40-8538c6c24dd8
 # ╠═52be22c2-3817-4c6f-b270-04447b5da0ae
