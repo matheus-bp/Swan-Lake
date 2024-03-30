@@ -156,8 +156,10 @@ begin
 	plot!(v_space,pcygspec,lw=3,c=:blue, label="P-Cygni profile")
 end
 
-# ╔═╡ 7d506126-3def-4efa-95bc-d166a3176c52
-
+# ╔═╡ 352e3f48-a2d4-46aa-be32-c3d3a036ed84
+md"""
+---
+"""
 
 # ╔═╡ 78fcf3ae-cc69-4ff2-acc3-76732a9822a3
 begin
@@ -1433,7 +1435,7 @@ version = "1.4.1+1"
 # ╠═f710858e-b28a-436d-b851-e3a950fbb3f1
 # ╠═671c3591-6885-4c75-b16d-4221004bce39
 # ╠═ddae4873-f934-48e9-ba0e-00359dfbfe5f
-# ╠═7d506126-3def-4efa-95bc-d166a3176c52
+# ╟─352e3f48-a2d4-46aa-be32-c3d3a036ed84
 # ╟─78fcf3ae-cc69-4ff2-acc3-76732a9822a3
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
