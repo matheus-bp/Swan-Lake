@@ -148,9 +148,10 @@ end
 begin
 	pcygspec = emispec .+ absspec
 
-	plot(v_space,emispec,lw=0.7,c=:lime,alpha=0.2,ls=:dash,bg=:black)
-	plot!(v_space,absspec,lw=1,c=:fuchsia,alpha=0.2,ls=:dot,bg=:black)
-	plot!(v_space,pcygspec,lw=3,c=:blue,bg=:black)
+	plot(bg=:black)
+	plot!(v_space,emispec,lw=0.7,c=:lime,alpha=0.3,ls=:dash,label="emission component")
+	plot!(v_space,absspec,lw=1,c=:fuchsia,alpha=0.3,ls=:dot,label="absorption component")
+	plot!(v_space,pcygspec,lw=3,c=:blue, label="P-Cygni profile")
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -1362,7 +1363,7 @@ version = "1.4.1+1"
 # ╠═d807e439-7750-49e5-98e3-2bccce1b99ce
 # ╠═8690f664-1b30-41c8-8af8-fa6a94d5b7a1
 # ╠═69664117-3bb0-4dd4-afda-eebf0073cbab
-# ╠═df76de07-8c02-40d6-a468-9fcd8be85172
+# ╟─df76de07-8c02-40d6-a468-9fcd8be85172
 # ╟─41227558-db4f-434b-930e-aefb9d3edaa2
 # ╠═2e8ed24c-47ab-4027-9b40-8538c6c24dd8
 # ╠═52be22c2-3817-4c6f-b270-04447b5da0ae
