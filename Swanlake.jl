@@ -108,6 +108,7 @@ begin
 	hspan!([v∞,v∞+0.1])
 	plot_ρ = plot(r,ρ,xaxis=:log,yaxis=:log,background_color=:black)
 	plot(plot_v, plot_ρ, layout = (1, 2), legend = false,background_color=:black)
+	plot!(size=(1000,400))
 end
 
 # ╔═╡ ddae4873-f934-48e9-ba0e-00359dfbfe5f
@@ -153,6 +154,66 @@ begin
 	plot!(v_space,emispec,lw=0.7,c=:lime,alpha=0.3,ls=:dash,label="emission component")
 	plot!(v_space,absspec,lw=1,c=:fuchsia,alpha=0.3,ls=:dot,label="absorption component")
 	plot!(v_space,pcygspec,lw=3,c=:blue, label="P-Cygni profile")
+end
+
+# ╔═╡ 7d506126-3def-4efa-95bc-d166a3176c52
+
+
+# ╔═╡ 78fcf3ae-cc69-4ff2-acc3-76732a9822a3
+begin
+	println("Notebook customization")
+	html"""
+	<style>
+	
+	/*              screen size more than:                     and  less than:                     */
+	@media screen and (max-width: 699px) { /* Tablet */ 
+	  /* Nest everything into here */
+	    main { /* Same as before */
+	        max-width: 1000px !important; /* Same as before */
+	        margin-right: 100px !important; /* Same as before */
+			/* margin-left: 100px !important;  /*Same as before */
+	    } /* Same as before*/
+	
+	}
+	
+	@media screen and (min-width: 700px) and (max-width: 1199px) { /* Laptop*/ 
+	  /* Nest everything into here */
+	    main { /* Same as before */
+	        max-width: 1200px !important; /* Same as before */
+	        margin-right: 100px !important; /* Same as before */
+			margin-left: 100px !important;  /*Same as before */
+	    } /* Same as before*/
+	}
+	
+	@media screen and (min-width:1200px) and (max-width: 1920px) { /* Desktop */ 
+	  /* Nest everything into here */
+	    main { /* Same as before */
+	        max-width: 1000px !important; /* Same as before */
+	        margin-right: 300px !important; /* Same as before */
+			margin-left: 100px !important;  /*Same as before */
+	    } /* Same as before*/
+	}
+	
+	@media screen and (min-width:1921px) { /* Stadium */ 
+	  /* Nest everything into here */
+	    main { /* Same as before */
+	        max-width: 1000px !important; /* Same as before */
+	        margin-right: 100px !important; /* Same as before */
+			margin-left: 100px !important;  /*Same as before */
+	    } /* Same as before*/
+	}
+	/* Change width of cells */
+	/* source: https://discourse.julialang.org/t/modify-right-margin-in-pluto-notebook/61452 */
+	</style>
+	
+	<style>
+	pluto-helpbox {
+	    width: 20vw;
+	}
+	/* Change width of helpbox */
+	/* source: https://discourse.julialang.org/t/pluto-how-to-increase-the-width-of-live-docs/59057/5 */
+	<\style>
+	"""
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -1372,5 +1433,7 @@ version = "1.4.1+1"
 # ╠═f710858e-b28a-436d-b851-e3a950fbb3f1
 # ╠═671c3591-6885-4c75-b16d-4221004bce39
 # ╠═ddae4873-f934-48e9-ba0e-00359dfbfe5f
+# ╠═7d506126-3def-4efa-95bc-d166a3176c52
+# ╟─78fcf3ae-cc69-4ff2-acc3-76732a9822a3
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
