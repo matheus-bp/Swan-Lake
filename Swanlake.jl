@@ -68,7 +68,10 @@ md"""
 """
 
 # ╔═╡ d96921f8-f7a2-4215-84da-c88d78ad714d
-@bind S Slider(1:1:100, show_value=true)
+@bind S Slider(1:1:1000, show_value=true)
+
+# ╔═╡ 6a8d8d18-a56c-4ef1-968f-bbb84132e8b7
+@bind kline Slider(0:0.01:1, show_value=true)
 
 # ╔═╡ 41227558-db4f-434b-930e-aefb9d3edaa2
 md"""
@@ -117,7 +120,6 @@ r = collect(1:0.005:1000)
 
 # ╔═╡ 0287f1d7-044b-4726-a894-fa1d0734ac43
 begin
-	kline = 1
 	emilaw = S^-1 * kline .* r.^-3
 	abslaw = kline .* r.^-3 #+ 1e2.*exp.(1 .-r) #200 .* exp(-τ2[j] * 1e15) #100#exp(-ρ[j])
 	
@@ -165,22 +167,29 @@ begin
 			end
 		end
 	end
-	plot(v_space,absspec,c=:fuchsia,bg=:black)
+	# plot(v_space,absspec,c=:fuchsia,bg=:black)
 end
 
 # ╔═╡ df76de07-8c02-40d6-a468-9fcd8be85172
 begin
 	pcygspec = emispec .+ absspec .- 1
+	## Saturation (artificial)
+	for (f,flux) in enumerate(pcygspec)
+		if pcygspec[f] < 0
+			pcygspec[f] = 0
+		end
+	end	
 
 	l = @layout [
     [a{0.6w,0.9h} grid(2,1)]
 	b{0.3h}
 	]
 
-	p1 = plot(bg=:black,yaxis=false,legend=:bottomright,xlabel="v [km s⁻¹]")
+	p1 = plot(bg=:black,legend=:bottomright,xlabel="v [km s⁻¹]",ylabel="Norm. flux")
 	plot!(v_space,emispec,lw=1,c=:lime,alpha=0.3,ls=:dash,label="emission component")
 	plot!(v_space,absspec,lw=1,c=:fuchsia,alpha=0.3,ls=:dash,label="absorption component")
 	plot!(v_space,pcygspec,lw=3,c=:blue, label="P-Cygni profile")
+	ylims!(min(pcygspec...)-0.05,max(pcygspec...)+0.05)
 
 	p2 = plot(r,v,xaxis=:log,c=:red,label="v(r)",xlabel="r [R]",ylabel="v [km s⁻¹]")
 	p3 = plot(r,ρ,xaxis=:log,yaxis=:log,c=:orange,label="ρ(r)",xlabel="r [R]",ylabel="ρ [g cm⁻³]")
@@ -1470,9 +1479,10 @@ version = "1.4.1+1"
 # ╠═d807e439-7750-49e5-98e3-2bccce1b99ce
 # ╠═8690f664-1b30-41c8-8af8-fa6a94d5b7a1
 # ╟─69664117-3bb0-4dd4-afda-eebf0073cbab
-# ╟─df76de07-8c02-40d6-a468-9fcd8be85172
+# ╠═df76de07-8c02-40d6-a468-9fcd8be85172
 # ╠═a80556b1-0a28-4d31-a6bc-0d275be63d98
 # ╠═d96921f8-f7a2-4215-84da-c88d78ad714d
+# ╠═6a8d8d18-a56c-4ef1-968f-bbb84132e8b7
 # ╠═0287f1d7-044b-4726-a894-fa1d0734ac43
 # ╟─41227558-db4f-434b-930e-aefb9d3edaa2
 # ╠═2e8ed24c-47ab-4027-9b40-8538c6c24dd8
