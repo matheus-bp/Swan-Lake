@@ -36,6 +36,12 @@ md"""
 The density $\rho(r)$ is established through the mass conservation: $\dot{M} = 4\pi r^2 \rho v$
 """
 
+# ╔═╡ b626f40d-e9fb-41c0-830d-7636a716cee7
+# ╠═╡ disabled = true
+#=╠═╡
+@bind β Slider(0.5:0.1:4, show_value=true)
+  ╠═╡ =#
+
 # ╔═╡ 3d17748e-537a-47c9-b4f2-fa3b55eccf70
 @bind v∞ Slider(100:2000, show_value=true)
 
@@ -66,6 +72,9 @@ md"""
 md"""
 ### The sexy P Cygni profile!
 """
+
+# ╔═╡ a80556b1-0a28-4d31-a6bc-0d275be63d98
+@bind β Slider(0.5:0.1:4, show_value=true)
 
 # ╔═╡ d96921f8-f7a2-4215-84da-c88d78ad714d
 @bind S Slider(1:1:1000, show_value=true)
@@ -118,6 +127,9 @@ end
 # r = 10 .^ range(0, stop=4, length=101)
 r = collect(1:0.005:1000)
 
+# ╔═╡ 14926420-8c60-4db3-9dc7-043a996d3ab4
+@bind jj NumberField(1:length(r))
+
 # ╔═╡ 0287f1d7-044b-4726-a894-fa1d0734ac43
 begin
 	emilaw = S^-1 * kline .* r.^-3
@@ -143,15 +155,30 @@ Rstar = 1
 
 # ╔═╡ 7e1ba257-6a74-4008-9546-5f5bd501fd96
 begin
+	emispec_r = ones(length(v_space))
 	emispec = ones(length(v_space))
 	for (i,vz) in enumerate(v_space)
+		if vz < v[jj]*cosd(θ_crit_emi[jj]) && vz > v[jj]*cosd(180)
+			emispec_r[i] += emilaw[jj]
+		end			
+		
 		for j in 1:length(v)
 			if vz < v[j]*cosd(θ_crit_emi[j]) && vz > v[j]*cosd(180)
 				emispec[i] += emilaw[j] #0.003 * exp(ρ[j])#200 .* exp(-τ[end:-1:1][j] .* 1e15)
 			end
 		end
 	end
-	plot(v_space,emispec,c=:lime,bg=:black)
+	pe1 = plot(v_space,emispec_r,c=:lime,bg=:black,linetype=:stepmid,label="emission\nspectrum\n(r = "*string(r[jj])*")")
+	vline!([-v∞,+v∞],label=false,ls=:dash,c=:white)
+	vline!([0],label=false,ls=:dash,c=:dimgrey)
+
+	pe2 = plot(v_space,emispec,c=:lime,bg=:black,linetype=:stepmid,label=false)
+	vline!([-v∞,+v∞],label="v∞",ls=:dash,c=:white)
+	vline!([0],label=false,ls=:dash,c=:dimgrey)
+
+	plot(pe1,pe2,bg=:black,layout=(2,1))
+	
+	# vline!(+v∞)
 end
 
 # ╔═╡ d807e439-7750-49e5-98e3-2bccce1b99ce
@@ -160,36 +187,71 @@ end
 # ╔═╡ 8690f664-1b30-41c8-8af8-fa6a94d5b7a1
 begin
 	absspec = ones(length(v_space))
+	absspec_r = ones(length(v_space))
 	for (i,vz) in enumerate(v_space)
+		if vz < v[jj]*cosd(θ_crit_abs[jj]) && vz > v[jj]*cosd(180)
+			absspec_r[i] -= abslaw[jj]
+		end	
+
 		for j in 1:length(v)
 			if vz < v[j]*cosd(θ_crit_abs[j]) && vz > v[j]*cosd(180)
 				absspec[i] -= abslaw[j]
 			end
 		end
 	end
-	# plot(v_space,absspec,c=:fuchsia,bg=:black)
+	## Saturation (artificial)
+	absspec0 = copy(absspec)
+	absspec0_r = copy(absspec_r)
+	for (f,flux) in enumerate(absspec0)
+		if absspec0[f] < 0
+			absspec0[f] = 0
+		end
+		if absspec0_r[f] < 0
+			absspec0_r[f] = 0
+		end
+	end	
+	
+	pa1 = plot(v_space,absspec_r,c=:fuchsia,bg=:black,linetype=:stepmid,label="absorption\nspectrum\n(r = "*string(r[jj])*")")
+	plot!(v_space,absspec0_r,c=:fuchsia,bg=:black,ls=:dash,linetype=:stepmid,label=false)
+	vline!([-v∞,+v∞],label=false,ls=:dash,c=:white)
+	vline!([0],label=false,ls=:dash,c=:dimgrey)
+
+	pa2 = plot(v_space,absspec,c=:fuchsia,bg=:black,linetype=:stepmid,label=false)
+	plot!(v_space,absspec0,c=:fuchsia,bg=:black,ls=:dash,linetype=:stepmid,label=false)
+	vline!([-v∞,+v∞],label="v∞",ls=:dash,c=:white)
+	vline!([0],label=false,ls=:dash,c=:dimgrey)
+
+	plot(pa1,pa2,bg=:black,layout=(2,1))
 end
 
 # ╔═╡ df76de07-8c02-40d6-a468-9fcd8be85172
 begin
 	pcygspec = emispec .+ absspec .- 1
+	pcygspec_r = emispec_r .+ absspec_r .- 1
 	## Saturation (artificial)
 	for (f,flux) in enumerate(pcygspec)
 		if pcygspec[f] < 0
 			pcygspec[f] = 0
 		end
 	end	
+	for (f,flux) in enumerate(pcygspec_r)
+		if pcygspec_r[f] < 0
+			pcygspec_r[f] = 0
+		end
+	end	
 
 	l = @layout [
-    [a{0.6w,0.9h} grid(2,1)]
-	b{0.3h}
+    a{0.6w,0.9h} [b{0.4w,0.2h} c{0.4w,0.2h}]
+	[d{0.4w,0.3h} e{0.4w,0.3h}]
 	]
 
 	p1 = plot(bg=:black,legend=:bottomright,xlabel="v [km s⁻¹]",ylabel="Norm. flux")
-	plot!(v_space,emispec,lw=1,c=:lime,alpha=0.3,ls=:dash,label="emission component")
-	plot!(v_space,absspec,lw=1,c=:fuchsia,alpha=0.3,ls=:dash,label="absorption component")
-	plot!(v_space,pcygspec,lw=3,c=:blue, label="P-Cygni profile")
+	plot!(v_space,emispec,lw=1,c=:lime,alpha=0.3,ls=:dash,label="emission component",linetype=:stepmid)
+	plot!(v_space,absspec,lw=1,c=:fuchsia,alpha=0.3,ls=:dash,label="absorption component",linetype=:stepmid)
+	plot!(v_space,pcygspec,lw=3,c=:blue, label="P-Cygni profile",linetype=:stepmid)
 	ylims!(min(pcygspec...)-0.05,max(pcygspec...)+0.05)
+	vline!([-v∞,+v∞],label=false,ls=:dash,c=:white,alpha=0.5)
+	vline!([0],label=false,ls=:dash,c=:dimgrey,alpha=0.5)
 
 	p2 = plot(r,v,xaxis=:log,c=:red,label="v(r)",xlabel="r [R]",ylabel="v [km s⁻¹]")
 	p3 = plot(r,ρ,xaxis=:log,yaxis=:log,c=:orange,label="ρ(r)",xlabel="r [R]",ylabel="ρ [g cm⁻³]")
@@ -197,8 +259,16 @@ begin
 	p4 = plot(bg=:black,xaxis=:log,yaxis=:log)
 	plot!(r,emilaw,c=:green,label="emission law",xlabel="r [R]")
 	plot!(r,abslaw,c=:fuchsia,label="absorption law",xlabel="r [R]")
+
+	p5 = plot(bg=:black,legend=:bottomright,xlabel="v [km s⁻¹]",ylabel="Norm. flux")
+	plot!(v_space,emispec_r,lw=1,c=:lime,alpha=0.3,ls=:dash,label=false,linetype=:stepmid)
+	plot!(v_space,absspec_r,lw=1,c=:fuchsia,alpha=0.3,ls=:dash,label=false,linetype=:stepmid)
+	plot!(v_space,pcygspec_r,lw=3,c=:blue, label="P-Cygni profile\nof shell r="*string(r[jj]),linetype=:stepmid)
+	ylims!(min(pcygspec_r...),max(pcygspec_r...))
+	vline!([-v∞,+v∞],label=false,ls=:dash,c=:white,alpha=0.5)
+	vline!([0],label=false,ls=:dash,c=:dimgrey,alpha=0.5)
 	
-	plot(p1,p2,p3,p4, layout = l,size=(800,500))
+	plot(p1,p2,p3,p5,p4, layout = @layout([a{0.7w} grid(2,1) ; a{0.7w} a]),size=(800,500))
 end
 
 # ╔═╡ 352e3f48-a2d4-46aa-be32-c3d3a036ed84
@@ -262,15 +332,6 @@ begin
 	<\style>
 	"""
 end
-
-# ╔═╡ a80556b1-0a28-4d31-a6bc-0d275be63d98
-@bind β Slider(0.5:0.1:4, show_value=true)
-
-# ╔═╡ b626f40d-e9fb-41c0-830d-7636a716cee7
-# ╠═╡ disabled = true
-#=╠═╡
-@bind β Slider(0.5:0.1:4, show_value=true)
-  ╠═╡ =#
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1474,10 +1535,11 @@ version = "1.4.1+1"
 # ╟─ac6f9884-6e65-426f-8f7d-af13df424de7
 # ╠═a8a79526-aa33-400d-b889-a7a2e76eac93
 # ╠═06a195de-a9e9-4aa1-896b-df4eb9ac6632
-# ╠═7e1ba257-6a74-4008-9546-5f5bd501fd96
+# ╠═14926420-8c60-4db3-9dc7-043a996d3ab4
+# ╟─7e1ba257-6a74-4008-9546-5f5bd501fd96
 # ╟─96565d3a-fdeb-41b9-988e-1af01b9733fc
 # ╠═d807e439-7750-49e5-98e3-2bccce1b99ce
-# ╠═8690f664-1b30-41c8-8af8-fa6a94d5b7a1
+# ╟─8690f664-1b30-41c8-8af8-fa6a94d5b7a1
 # ╟─69664117-3bb0-4dd4-afda-eebf0073cbab
 # ╠═df76de07-8c02-40d6-a468-9fcd8be85172
 # ╠═a80556b1-0a28-4d31-a6bc-0d275be63d98
