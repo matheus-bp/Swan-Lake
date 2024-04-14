@@ -36,12 +36,6 @@ md"""
 The density $\rho(r)$ is established through the mass conservation: $\dot{M} = 4\pi r^2 \rho v$
 """
 
-# ╔═╡ b626f40d-e9fb-41c0-830d-7636a716cee7
-# ╠═╡ disabled = true
-#=╠═╡
-@bind β Slider(0.5:0.1:4, show_value=true)
-  ╠═╡ =#
-
 # ╔═╡ 3d17748e-537a-47c9-b4f2-fa3b55eccf70
 @bind v∞ Slider(100:2000, show_value=true)
 
@@ -72,9 +66,6 @@ md"""
 md"""
 ### The sexy P Cygni profile!
 """
-
-# ╔═╡ a80556b1-0a28-4d31-a6bc-0d275be63d98
-@bind β Slider(0.5:0.1:4, show_value=true)
 
 # ╔═╡ d96921f8-f7a2-4215-84da-c88d78ad714d
 @bind S Slider(1:1:1000, show_value=true)
@@ -142,10 +133,12 @@ begin
 end
 
 # ╔═╡ 52be22c2-3817-4c6f-b270-04447b5da0ae
+#=╠═╡
 begin
 	v = velo(r, v∞, β)
 	ρ = dens(r,v,dₜM)
 end
+  ╠═╡ =#
 
 # ╔═╡ ddae4873-f934-48e9-ba0e-00359dfbfe5f
 Rstar = 1
@@ -154,6 +147,7 @@ Rstar = 1
 θ_crit_emi = asind.(Rstar./r) #ArcSIN in Degrees
 
 # ╔═╡ 7e1ba257-6a74-4008-9546-5f5bd501fd96
+#=╠═╡
 begin
 	emispec_r = ones(length(v_space))
 	emispec = ones(length(v_space))
@@ -180,11 +174,13 @@ begin
 	
 	# vline!(+v∞)
 end
+  ╠═╡ =#
 
 # ╔═╡ d807e439-7750-49e5-98e3-2bccce1b99ce
 θ_crit_abs = 180 .- asind.(Rstar./r) #ArcSIN in Degrees
 
 # ╔═╡ 8690f664-1b30-41c8-8af8-fa6a94d5b7a1
+#=╠═╡
 begin
 	absspec = ones(length(v_space))
 	absspec_r = ones(length(v_space))
@@ -223,8 +219,10 @@ begin
 
 	plot(pa1,pa2,bg=:black,layout=(2,1))
 end
+  ╠═╡ =#
 
 # ╔═╡ df76de07-8c02-40d6-a468-9fcd8be85172
+#=╠═╡
 begin
 	pcygspec = emispec .+ absspec .- 1
 	pcygspec_r = emispec_r .+ absspec_r .- 1
@@ -270,6 +268,7 @@ begin
 	
 	plot(p1,p2,p3,p5,p4, layout = @layout([a{0.7w} grid(2,1) ; a{0.7w} a]),size=(800,500))
 end
+  ╠═╡ =#
 
 # ╔═╡ 352e3f48-a2d4-46aa-be32-c3d3a036ed84
 md"""
@@ -332,6 +331,17 @@ begin
 	<\style>
 	"""
 end
+
+# ╔═╡ a80556b1-0a28-4d31-a6bc-0d275be63d98
+#=╠═╡
+@bind β Slider(0.5:0.1:4, show_value=true)
+  ╠═╡ =#
+
+# ╔═╡ b626f40d-e9fb-41c0-830d-7636a716cee7
+# ╠═╡ disabled = true
+#=╠═╡
+@bind β Slider(0.5:0.1:4, show_value=true)
+  ╠═╡ =#
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
