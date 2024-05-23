@@ -66,7 +66,11 @@ r0 = copy(rad0)
 grid = collect(1:1:ND)
 
 # ╔═╡ 0b5b587c-3519-44fe-a7d0-fc3e7e3dc939
-plot(grid,r0,bg=:black)
+begin
+	plot(grid,r0,bg=:black,label="")
+	xlabel!("depthpoints (I)")
+	ylabel!("radius (r) [Stellar radius]")
+end
 
 # ╔═╡ 8a6f1907-fa78-4f20-b5ac-b4e990926d34
 function velo(r,v∞,β;v₀ = 0.01,Rstar=1)
@@ -77,14 +81,14 @@ end
 v0 = velo.(r0,v∞,β)
 
 # ╔═╡ 89cb7789-8c63-4974-9629-260f1f66cea0
-plot(r0,v0,bg=:black,xaxis=:log,yaxis=:log)
+plot(r0,v0,bg=:black,xaxis=:log,yaxis=:log,xlabel="r",ylabel="velocity (v)",label="")
 
 # ╔═╡ 4fa007f4-861a-4916-b2b5-4beb621ecdd0
 Δ(v0)
 
 # ╔═╡ 35e831ce-236a-4a3a-9fce-1e27f0a3f8fc
 begin
-	plot(grid,Δ(v0) ./ Δ(r0),bg=:black,marker=:circle)
+	plot(grid,Δ(v0) ./ Δ(r0),bg=:black,marker=:circle,xlabel="I",ylabel="Δv/Δr",label="")
 	# hline!([Δ_total(v0)/Δ_total(r0)])
 end
 
@@ -116,8 +120,11 @@ end
 
 # ╔═╡ e5846b20-937b-4d37-b9ff-4a8ead71e855
 begin
-	plot(grid,r0,bg=:black,marker=:circle)
-	plot!(grid,r,bg=:black,marker=:diamond)
+	plot(bg=:black)
+	plot!(grid,r0,marker=:circle,label="initial grid")
+	plot!(grid,r,marker=:diamond,label="updated grid")
+	xlabel!("I")
+	ylabel!("r")
 end
 
 # ╔═╡ 224f102a-9b19-43c5-9f56-7a1396e1af4f
@@ -125,14 +132,21 @@ v = velo.(r,v∞,β)
 
 # ╔═╡ cba4eeaf-54ba-40cc-a1ee-65fe79ace603
 begin
-	plot(r0,v0,bg=:black,xaxis=:log,yaxis=:log,marker=:circle)
-	plot!(r,v,bg=:black,xaxis=:log,yaxis=:log,marker=:diamond)
+	plot(bg=:black)
+	plot!(r0,v0,bg=:black,xaxis=:log,yaxis=:log,marker=:circle,label="initial v(r)")
+	plot!(r,v,bg=:black,xaxis=:log,yaxis=:log,marker=:diamond,label="updated v(r)")
+	xlabel!("r")
+	ylabel!("v(r)")
 end
 
 # ╔═╡ a978afa2-df14-4e33-88d4-40b87099baa8
 begin
-	plot(grid,Δ(v0) ./ Δ(r0),bg=:black,marker=:circle)
-	plot!(grid,Δ(v) ./ Δ(r),bg=:black,marker=:diamond)
+	plot(bg=:black)
+	plot!(grid,Δ(v0) ./ Δ(r0),bg=:black,marker=:circle,label="initial")
+	plot!(grid,Δ(v) ./ Δ(r),bg=:black,marker=:diamond,label="updated")
+	xlabel!("I")
+	ylabel!("Δv/Δr")
+
 	# hline!([Δ_total(v0)/Δ_total(r0)])
 end
 
