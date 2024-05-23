@@ -14,268 +14,137 @@ macro bind(def, element)
     end
 end
 
-# ╔═╡ 2e8ed24c-47ab-4027-9b40-8538c6c24dd8
+# ╔═╡ 713ef183-0e80-47fc-bd08-10a772dbfc83
 begin
-	using PlutoUI
 	using Plots
-	using Interpolations
+	using PlutoUI
 end
 
-# ╔═╡ 9afa992c-29a6-4d64-81e7-798dff0160f0
-md"""
-## The $\beta$ velocity law
-"""
+# ╔═╡ 359367cc-7160-4e09-87b7-f8c08402cec7
+rmax = 100
 
-# ╔═╡ 5c446475-ac88-4b13-8bc2-567a8c92c1f6
-md"""
-The velocity profile is described by $v(r) = v_0 + (v_\infty - v_0) (1 - R_*/r)^\beta$
-"""
+# ╔═╡ 660e32b2-f198-4b5f-b757-ad996376f922
+ND = 80
 
-# ╔═╡ 71bf1d3c-67fc-4c42-8c48-2870ed517227
-md"""
-The density $\rho(r)$ is established through the mass conservation: $\dot{M} = 4\pi r^2 \rho v$
-"""
-
-# ╔═╡ 3d17748e-537a-47c9-b4f2-fa3b55eccf70
+# ╔═╡ 5deb7a92-ff2e-49d6-bfec-df18979ef332
 @bind v∞ Slider(100:2000, show_value=true)
 
-# ╔═╡ 0947c099-9e2e-4dee-82e7-bed1039df480
-@bind dₜM Slider(0.1:10, show_value=true)
+# ╔═╡ f9301106-c4a8-4229-8ba6-861a54de293a
+@bind β Slider(0.5:0.1:4, show_value=true)
 
-# ╔═╡ 85c3dbba-3d26-484c-b3d5-ed30486984ba
-md"""
-## Formation of the P-Cygni profile
-"""
+# ╔═╡ b5d226c0-4c4e-47d5-8a44-36e97041cd7f
+md"""---"""
 
-# ╔═╡ ac6f9884-6e65-426f-8f7d-af13df424de7
-md"""
-### The emission component
-"""
-
-# ╔═╡ a8a79526-aa33-400d-b889-a7a2e76eac93
+# ╔═╡ bb44bd27-2860-4930-b9ac-f35286403676
 begin
-	v_space = collect(-3000:60:3000)
-end
-
-# ╔═╡ 96565d3a-fdeb-41b9-988e-1af01b9733fc
-md"""
-### The absorption component
-"""
-
-# ╔═╡ 69664117-3bb0-4dd4-afda-eebf0073cbab
-md"""
-### The sexy P Cygni profile!
-"""
-
-# ╔═╡ d96921f8-f7a2-4215-84da-c88d78ad714d
-@bind S Slider(1:1:1000, show_value=true)
-
-# ╔═╡ 6a8d8d18-a56c-4ef1-968f-bbb84132e8b7
-@bind kline Slider(0:0.01:1, show_value=true)
-
-# ╔═╡ 41227558-db4f-434b-930e-aefb9d3edaa2
-md"""
----
-"""
-
-# ╔═╡ 9ad1c424-969c-473e-878c-a7e404b42b39
-# begin
-# 	τ = zeros(length(r))
-# 	for (i,r0) in enumerate(r)
-# 		τ[i] += taul(1e-7,ρ,r,r0)
-# 	end
-# end
-
-# ╔═╡ 631b66b0-ef3c-4ab4-b0ef-f2bbc2cf5b76
-# begin
-# 	p1 = plot(log10.(r),exp.(τ),yaxis=:log,bg=:black)
-# 	p2 = plot(log10.(r),τ,yaxis=:log,bg=:black)
-# 	plot(p1,p2,layout=(1,2))
-# end
-
-# ╔═╡ fec38576-f2da-47ac-8204-dbf8b1112d52
-function taul(κ,ρ,r,r0)
-	if r0 ∈ r
-		i = findfirst(x->x==r0,r)
-		# taul = κ  * sum(r[end:-1:i]' * ρ[end:-1:i])
-		taul = κ  * sum(ρ[i:end])
-	else
-		print("r value not found")
+	Δ = function(arr,effective_zero = 1e-80)
+		Δ = ones(length(arr)) .* effective_zero
+		for i in collect(2:1:length(arr))
+			Δ[i] = arr[i] - arr[i-1]
+		end
+		Δ
+	end
+	
+	Δ_total = function(arr)
+		Δ_total = arr[end] - arr[1]
 	end
 end
 
-# ╔═╡ 0d0e415c-edeb-11ee-24c6-656802435014
+# ╔═╡ 17ab5fc0-25c3-4c7e-a867-425f8faa5219
+md"""---"""
+
+# ╔═╡ 56b87534-5533-407f-a719-ca824322fd8f
+md"""---"""
+
+# ╔═╡ 934da02e-a572-48ec-a0c7-ccb20d30695d
+rad0 = collect(1:rmax/ND:rmax)
+
+# ╔═╡ 3aaa73c7-bf48-4d9c-8742-f919b3d2be27
+r0 = copy(rad0)
+
+# ╔═╡ 2111a899-69d1-478d-934c-66b81405f2ad
+grid = collect(1:1:ND)
+
+# ╔═╡ 0b5b587c-3519-44fe-a7d0-fc3e7e3dc939
+plot(grid,r0,bg=:black)
+
+# ╔═╡ 8a6f1907-fa78-4f20-b5ac-b4e990926d34
 function velo(r,v∞,β;v₀ = 0.01,Rstar=1)
 	velo = v₀ .+ (v∞-v₀) .* (1 .- Rstar./r).^β
 end
 
-# ╔═╡ f710858e-b28a-436d-b851-e3a950fbb3f1
+# ╔═╡ 8dc97195-9b7d-4498-ac08-56244985f6df
+v0 = velo.(r0,v∞,β)
+
+# ╔═╡ 89cb7789-8c63-4974-9629-260f1f66cea0
+plot(r0,v0,bg=:black,xaxis=:log,yaxis=:log)
+
+# ╔═╡ 4fa007f4-861a-4916-b2b5-4beb621ecdd0
+Δ(v0)
+
+# ╔═╡ 35e831ce-236a-4a3a-9fce-1e27f0a3f8fc
+begin
+	plot(grid,Δ(v0) ./ Δ(r0),bg=:black,marker=:circle)
+	# hline!([Δ_total(v0)/Δ_total(r0)])
+end
+
+# ╔═╡ 9709cdbe-edd9-48b1-88bc-dbe257dcf058
+begin
+	r = copy(r0)
+	N_remap_grid = 100
+	for t in collect(1:1:N_remap_grid)
+		v = velo.(r,v∞,β)
+		ΔvΔr = abs.(Δ(v)./Δ(r))
+		iΔm = findfirst(x->x==maximum(ΔvΔr),ΔvΔr)  # index where Δv/Δr is maximum
+		# print(iΔm," ")
+		if iΔm != 1
+			if iΔm != 2
+				var_max = ((r[iΔm-1]-r[1])/(r[iΔm]-r[1]))
+				var = (var_max + 1)/2
+				# print(var,",",var_max," ")
+			else
+				var_max = 1
+				var = 0.8
+			end
+			if var_max < 0.9
+				r[iΔm] = r[iΔm] * var
+			end
+		end
+	end
+	r
+end
+
+# ╔═╡ e5846b20-937b-4d37-b9ff-4a8ead71e855
+begin
+	plot(grid,r0,bg=:black,marker=:circle)
+	plot!(grid,r,bg=:black,marker=:diamond)
+end
+
+# ╔═╡ 224f102a-9b19-43c5-9f56-7a1396e1af4f
+v = velo.(r,v∞,β)
+
+# ╔═╡ cba4eeaf-54ba-40cc-a1ee-65fe79ace603
+begin
+	plot(r0,v0,bg=:black,xaxis=:log,yaxis=:log,marker=:circle)
+	plot!(r,v,bg=:black,xaxis=:log,yaxis=:log,marker=:diamond)
+end
+
+# ╔═╡ a978afa2-df14-4e33-88d4-40b87099baa8
+begin
+	plot(grid,Δ(v0) ./ Δ(r0),bg=:black,marker=:circle)
+	plot!(grid,Δ(v) ./ Δ(r),bg=:black,marker=:diamond)
+	# hline!([Δ_total(v0)/Δ_total(r0)])
+end
+
+# ╔═╡ 2d796543-fd87-431c-bffc-123fe7500a42
 function dens(r,v,dₜM)
 	dens = dₜM ./ (4π .* v .* r.^2)
 end
 
-# ╔═╡ 671c3591-6885-4c75-b16d-4221004bce39
-# r = 10 .^ range(0, stop=4, length=101)
-r = collect(1:0.005:1000)
+# ╔═╡ 61448c86-3068-44ce-a21f-c215e1af5be3
+md"""---"""
 
-# ╔═╡ 14926420-8c60-4db3-9dc7-043a996d3ab4
-@bind jj NumberField(1:length(r))
-
-# ╔═╡ 0287f1d7-044b-4726-a894-fa1d0734ac43
-begin
-	emilaw = S^-1 * kline .* r.^-3
-	abslaw = kline .* r.^-3 #+ 1e2.*exp.(1 .-r) #200 .* exp(-τ2[j] * 1e15) #100#exp(-ρ[j])
-	
-	
-	# plot(bg=:black,xaxis=:log,yaxis=:log)
-	# plot!(r,emilaw,c=:green,label="emission law")
-	# plot!(r,abslaw,c=:fuchsia,label="absorption law")
-end
-
-# ╔═╡ 52be22c2-3817-4c6f-b270-04447b5da0ae
-#=╠═╡
-begin
-	v = velo(r, v∞, β)
-	ρ = dens(r,v,dₜM)
-end
-  ╠═╡ =#
-
-# ╔═╡ ddae4873-f934-48e9-ba0e-00359dfbfe5f
-Rstar = 1
-
-# ╔═╡ 06a195de-a9e9-4aa1-896b-df4eb9ac6632
-θ_crit_emi = asind.(Rstar./r) #ArcSIN in Degrees
-
-# ╔═╡ 7e1ba257-6a74-4008-9546-5f5bd501fd96
-#=╠═╡
-begin
-	emispec_r = ones(length(v_space))
-	emispec = ones(length(v_space))
-	for (i,vz) in enumerate(v_space)
-		if vz < v[jj]*cosd(θ_crit_emi[jj]) && vz > v[jj]*cosd(180)
-			emispec_r[i] += emilaw[jj]
-		end			
-		
-		for j in 1:length(v)
-			if vz < v[j]*cosd(θ_crit_emi[j]) && vz > v[j]*cosd(180)
-				emispec[i] += emilaw[j] #0.003 * exp(ρ[j])#200 .* exp(-τ[end:-1:1][j] .* 1e15)
-			end
-		end
-	end
-	pe1 = plot(v_space,emispec_r,c=:lime,bg=:black,linetype=:stepmid,label="emission\nspectrum\n(r = "*string(r[jj])*")")
-	vline!([-v∞,+v∞],label=false,ls=:dash,c=:white)
-	vline!([0],label=false,ls=:dash,c=:dimgrey)
-
-	pe2 = plot(v_space,emispec,c=:lime,bg=:black,linetype=:stepmid,label=false)
-	vline!([-v∞,+v∞],label="v∞",ls=:dash,c=:white)
-	vline!([0],label=false,ls=:dash,c=:dimgrey)
-
-	plot(pe1,pe2,bg=:black,layout=(2,1))
-	
-	# vline!(+v∞)
-end
-  ╠═╡ =#
-
-# ╔═╡ d807e439-7750-49e5-98e3-2bccce1b99ce
-θ_crit_abs = 180 .- asind.(Rstar./r) #ArcSIN in Degrees
-
-# ╔═╡ 8690f664-1b30-41c8-8af8-fa6a94d5b7a1
-#=╠═╡
-begin
-	absspec = ones(length(v_space))
-	absspec_r = ones(length(v_space))
-	for (i,vz) in enumerate(v_space)
-		if vz < v[jj]*cosd(θ_crit_abs[jj]) && vz > v[jj]*cosd(180)
-			absspec_r[i] -= abslaw[jj]
-		end	
-
-		for j in 1:length(v)
-			if vz < v[j]*cosd(θ_crit_abs[j]) && vz > v[j]*cosd(180)
-				absspec[i] -= abslaw[j]
-			end
-		end
-	end
-	## Saturation (artificial)
-	absspec0 = copy(absspec)
-	absspec0_r = copy(absspec_r)
-	for (f,flux) in enumerate(absspec0)
-		if absspec0[f] < 0
-			absspec0[f] = 0
-		end
-		if absspec0_r[f] < 0
-			absspec0_r[f] = 0
-		end
-	end	
-	
-	pa1 = plot(v_space,absspec_r,c=:fuchsia,bg=:black,linetype=:stepmid,label="absorption\nspectrum\n(r = "*string(r[jj])*")")
-	plot!(v_space,absspec0_r,c=:fuchsia,bg=:black,ls=:dash,linetype=:stepmid,label=false)
-	vline!([-v∞,+v∞],label=false,ls=:dash,c=:white)
-	vline!([0],label=false,ls=:dash,c=:dimgrey)
-
-	pa2 = plot(v_space,absspec,c=:fuchsia,bg=:black,linetype=:stepmid,label=false)
-	plot!(v_space,absspec0,c=:fuchsia,bg=:black,ls=:dash,linetype=:stepmid,label=false)
-	vline!([-v∞,+v∞],label="v∞",ls=:dash,c=:white)
-	vline!([0],label=false,ls=:dash,c=:dimgrey)
-
-	plot(pa1,pa2,bg=:black,layout=(2,1))
-end
-  ╠═╡ =#
-
-# ╔═╡ df76de07-8c02-40d6-a468-9fcd8be85172
-#=╠═╡
-begin
-	pcygspec = emispec .+ absspec .- 1
-	pcygspec_r = emispec_r .+ absspec_r .- 1
-	## Saturation (artificial)
-	for (f,flux) in enumerate(pcygspec)
-		if pcygspec[f] < 0
-			pcygspec[f] = 0
-		end
-	end	
-	for (f,flux) in enumerate(pcygspec_r)
-		if pcygspec_r[f] < 0
-			pcygspec_r[f] = 0
-		end
-	end	
-
-	l = @layout [
-    a{0.6w,0.9h} [b{0.4w,0.2h} c{0.4w,0.2h}]
-	[d{0.4w,0.3h} e{0.4w,0.3h}]
-	]
-
-	p1 = plot(bg=:black,legend=:bottomright,xlabel="v [km s⁻¹]",ylabel="Norm. flux")
-	plot!(v_space,emispec,lw=1,c=:lime,alpha=0.3,ls=:dash,label="emission component",linetype=:stepmid)
-	plot!(v_space,absspec,lw=1,c=:fuchsia,alpha=0.3,ls=:dash,label="absorption component",linetype=:stepmid)
-	plot!(v_space,pcygspec,lw=3,c=:blue, label="P-Cygni profile",linetype=:stepmid)
-	ylims!(min(pcygspec...)-0.05,max(pcygspec...)+0.05)
-	vline!([-v∞,+v∞],label=false,ls=:dash,c=:white,alpha=0.5)
-	vline!([0],label=false,ls=:dash,c=:dimgrey,alpha=0.5)
-
-	p2 = plot(r,v,xaxis=:log,c=:red,label="v(r)",xlabel="r [R]",ylabel="v [km s⁻¹]")
-	p3 = plot(r,ρ,xaxis=:log,yaxis=:log,c=:orange,label="ρ(r)",xlabel="r [R]",ylabel="ρ [g cm⁻³]")
-
-	p4 = plot(bg=:black,xaxis=:log,yaxis=:log)
-	plot!(r,emilaw,c=:green,label="emission law",xlabel="r [R]")
-	plot!(r,abslaw,c=:fuchsia,label="absorption law",xlabel="r [R]")
-
-	p5 = plot(bg=:black,legend=:bottomright,xlabel="v [km s⁻¹]",ylabel="Norm. flux")
-	plot!(v_space,emispec_r,lw=1,c=:lime,alpha=0.3,ls=:dash,label=false,linetype=:stepmid)
-	plot!(v_space,absspec_r,lw=1,c=:fuchsia,alpha=0.3,ls=:dash,label=false,linetype=:stepmid)
-	plot!(v_space,pcygspec_r,lw=3,c=:blue, label="P-Cygni profile\nof shell r="*string(r[jj]),linetype=:stepmid)
-	ylims!(min(pcygspec_r...),max(pcygspec_r...))
-	vline!([-v∞,+v∞],label=false,ls=:dash,c=:white,alpha=0.5)
-	vline!([0],label=false,ls=:dash,c=:dimgrey,alpha=0.5)
-	
-	plot(p1,p2,p3,p5,p4, layout = @layout([a{0.7w} grid(2,1) ; a{0.7w} a]),size=(800,500))
-end
-  ╠═╡ =#
-
-# ╔═╡ 352e3f48-a2d4-46aa-be32-c3d3a036ed84
-md"""
----
-"""
-
-# ╔═╡ 78fcf3ae-cc69-4ff2-acc3-76732a9822a3
+# ╔═╡ 1097bd8e-fa53-11ee-07ff-c7938ef41158
 begin
 	println("Notebook customization")
 	html"""
@@ -304,7 +173,7 @@ begin
 	@media screen and (min-width:1200px) and (max-width: 1920px) { /* Desktop */ 
 	  /* Nest everything into here */
 	    main { /* Same as before */
-	        max-width: 1000px !important; /* Same as before */
+	        max-width: 1200px !important; /* Same as before */
 	        margin-right: 300px !important; /* Same as before */
 			margin-left: 100px !important;  /*Same as before */
 	    } /* Same as before*/
@@ -324,7 +193,7 @@ begin
 	
 	<style>
 	pluto-helpbox {
-	    width: 20vw;
+	    width: 18vw;
 	}
 	/* Change width of helpbox */
 	/* source: https://discourse.julialang.org/t/pluto-how-to-increase-the-width-of-live-docs/59057/5 */
@@ -332,26 +201,13 @@ begin
 	"""
 end
 
-# ╔═╡ a80556b1-0a28-4d31-a6bc-0d275be63d98
-#=╠═╡
-@bind β Slider(0.5:0.1:4, show_value=true)
-  ╠═╡ =#
-
-# ╔═╡ b626f40d-e9fb-41c0-830d-7636a716cee7
-# ╠═╡ disabled = true
-#=╠═╡
-@bind β Slider(0.5:0.1:4, show_value=true)
-  ╠═╡ =#
-
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
-Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 
 [compat]
-Interpolations = "~0.15.1"
 Plots = "~1.40.2"
 PlutoUI = "~0.7.58"
 """
@@ -362,7 +218,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.2"
 manifest_format = "2.0"
-project_hash = "ebc0258b5478cba85d02e54f2c795d9f010871ab"
+project_hash = "080a28cb8097b42589a24f2da6b0adc4ac60956b"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -370,28 +226,12 @@ git-tree-sha1 = "0f748c81756f2e5e6854298f11ad8b2dfae6911a"
 uuid = "6e696c72-6542-2067-7265-42206c756150"
 version = "1.3.0"
 
-[[deps.Adapt]]
-deps = ["LinearAlgebra", "Requires"]
-git-tree-sha1 = "6a55b747d1812e699320963ffde36f1ebdda4099"
-uuid = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
-version = "4.0.4"
-weakdeps = ["StaticArrays"]
-
-    [deps.Adapt.extensions]
-    AdaptStaticArraysExt = "StaticArrays"
-
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
 version = "1.1.1"
 
 [[deps.Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
-
-[[deps.AxisAlgorithms]]
-deps = ["LinearAlgebra", "Random", "SparseArrays", "WoodburyMatrices"]
-git-tree-sha1 = "01b8ccb13d68535d73d2b0c23e39bd23155fb712"
-uuid = "13072b0f-2c55-5437-9ae7-d433b7a33950"
-version = "1.1.0"
 
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
@@ -412,16 +252,6 @@ deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jl
 git-tree-sha1 = "a4c43f59baa34011e303e76f5c8c91bf58415aaf"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.18.0+1"
-
-[[deps.ChainRulesCore]]
-deps = ["Compat", "LinearAlgebra"]
-git-tree-sha1 = "575cd02e080939a33b6df6c5853d14924c08e35b"
-uuid = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
-version = "1.23.0"
-weakdeps = ["SparseArrays"]
-
-    [deps.ChainRulesCore.extensions]
-    ChainRulesCoreSparseArraysExt = "SparseArrays"
 
 [[deps.CodecZlib]]
 deps = ["TranscodingStreams", "Zlib_jll"]
@@ -505,10 +335,6 @@ deps = ["Mmap"]
 git-tree-sha1 = "9e2f36d3c96a820c678f2f1f1782582fcf685bae"
 uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 version = "1.9.1"
-
-[[deps.Distributed]]
-deps = ["Random", "Serialization", "Sockets"]
-uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
@@ -657,16 +483,6 @@ version = "0.2.4"
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
-
-[[deps.Interpolations]]
-deps = ["Adapt", "AxisAlgorithms", "ChainRulesCore", "LinearAlgebra", "OffsetArrays", "Random", "Ratios", "Requires", "SharedArrays", "SparseArrays", "StaticArrays", "WoodburyMatrices"]
-git-tree-sha1 = "88a101217d7cb38a7b481ccd50d21876e1d1b0e0"
-uuid = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
-version = "0.15.1"
-weakdeps = ["Unitful"]
-
-    [deps.Interpolations.extensions]
-    InterpolationsUnitfulExt = "Unitful"
 
 [[deps.IrrationalConstants]]
 git-tree-sha1 = "630b497eafcc20001bba38a4651b327dcfc491d2"
@@ -898,15 +714,6 @@ version = "1.0.2"
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
 version = "1.2.0"
 
-[[deps.OffsetArrays]]
-git-tree-sha1 = "6a731f2b5c03157418a20c12195eb4b74c8f8621"
-uuid = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
-version = "1.13.0"
-weakdeps = ["Adapt"]
-
-    [deps.OffsetArrays.extensions]
-    OffsetArraysAdaptExt = "Adapt"
-
 [[deps.Ogg_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "887579a3eb005446d514ab7aeac5d1d027658b8f"
@@ -1041,16 +848,6 @@ uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 deps = ["SHA"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
-[[deps.Ratios]]
-deps = ["Requires"]
-git-tree-sha1 = "1342a47bf3260ee108163042310d26f2be5ec90b"
-uuid = "c84ed2f1-dad5-54f0-aa8e-dbefe2724439"
-version = "0.4.5"
-weakdeps = ["FixedPointNumbers"]
-
-    [deps.Ratios.extensions]
-    RatiosFixedPointNumbersExt = "FixedPointNumbers"
-
 [[deps.RecipesBase]]
 deps = ["PrecompileTools"]
 git-tree-sha1 = "5c3d09cc4f31f5fc6af001c250bf1278733100ff"
@@ -1093,10 +890,6 @@ version = "1.2.1"
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 
-[[deps.SharedArrays]]
-deps = ["Distributed", "Mmap", "Random", "Serialization"]
-uuid = "1a1011a3-84de-559e-8e89-a11a2f7dc383"
-
 [[deps.Showoff]]
 deps = ["Dates", "Grisu"]
 git-tree-sha1 = "91eddf657aca81df9ae6ceb20b959ae5653ad1de"
@@ -1121,22 +914,6 @@ version = "1.2.1"
 deps = ["Libdl", "LinearAlgebra", "Random", "Serialization", "SuiteSparse_jll"]
 uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 version = "1.10.0"
-
-[[deps.StaticArrays]]
-deps = ["LinearAlgebra", "PrecompileTools", "Random", "StaticArraysCore"]
-git-tree-sha1 = "bf074c045d3d5ffd956fa0a461da38a44685d6b2"
-uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.9.3"
-weakdeps = ["ChainRulesCore", "Statistics"]
-
-    [deps.StaticArrays.extensions]
-    StaticArraysChainRulesCoreExt = "ChainRulesCore"
-    StaticArraysStatisticsExt = "Statistics"
-
-[[deps.StaticArraysCore]]
-git-tree-sha1 = "36b3d696ce6366023a0ea192b4cd442268995a0d"
-uuid = "1e83bf80-4336-4d27-bf5d-d5a4f845583c"
-version = "1.4.2"
 
 [[deps.Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
@@ -1254,12 +1031,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "93f43ab61b16ddfb2fd3bb13b3ce241cafb0e6c9"
 uuid = "2381bf8a-dfd0-557d-9999-79630e7b1b91"
 version = "1.31.0+0"
-
-[[deps.WoodburyMatrices]]
-deps = ["LinearAlgebra", "SparseArrays"]
-git-tree-sha1 = "c1a7aa6219628fcd757dede0ca95e245c5cd9511"
-uuid = "efce3f68-66dc-5838-9240-27a6d6f5f9b6"
-version = "1.0.0"
 
 [[deps.XML2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libiconv_jll", "Zlib_jll"]
@@ -1535,38 +1306,31 @@ version = "1.4.1+1"
 """
 
 # ╔═╡ Cell order:
-# ╟─9afa992c-29a6-4d64-81e7-798dff0160f0
-# ╟─5c446475-ac88-4b13-8bc2-567a8c92c1f6
-# ╟─71bf1d3c-67fc-4c42-8c48-2870ed517227
-# ╠═b626f40d-e9fb-41c0-830d-7636a716cee7
-# ╠═3d17748e-537a-47c9-b4f2-fa3b55eccf70
-# ╠═0947c099-9e2e-4dee-82e7-bed1039df480
-# ╟─85c3dbba-3d26-484c-b3d5-ed30486984ba
-# ╟─ac6f9884-6e65-426f-8f7d-af13df424de7
-# ╠═a8a79526-aa33-400d-b889-a7a2e76eac93
-# ╠═06a195de-a9e9-4aa1-896b-df4eb9ac6632
-# ╠═14926420-8c60-4db3-9dc7-043a996d3ab4
-# ╟─7e1ba257-6a74-4008-9546-5f5bd501fd96
-# ╟─96565d3a-fdeb-41b9-988e-1af01b9733fc
-# ╠═d807e439-7750-49e5-98e3-2bccce1b99ce
-# ╟─8690f664-1b30-41c8-8af8-fa6a94d5b7a1
-# ╟─69664117-3bb0-4dd4-afda-eebf0073cbab
-# ╠═df76de07-8c02-40d6-a468-9fcd8be85172
-# ╠═a80556b1-0a28-4d31-a6bc-0d275be63d98
-# ╠═d96921f8-f7a2-4215-84da-c88d78ad714d
-# ╠═6a8d8d18-a56c-4ef1-968f-bbb84132e8b7
-# ╠═0287f1d7-044b-4726-a894-fa1d0734ac43
-# ╟─41227558-db4f-434b-930e-aefb9d3edaa2
-# ╠═2e8ed24c-47ab-4027-9b40-8538c6c24dd8
-# ╠═52be22c2-3817-4c6f-b270-04447b5da0ae
-# ╠═9ad1c424-969c-473e-878c-a7e404b42b39
-# ╠═631b66b0-ef3c-4ab4-b0ef-f2bbc2cf5b76
-# ╠═fec38576-f2da-47ac-8204-dbf8b1112d52
-# ╠═0d0e415c-edeb-11ee-24c6-656802435014
-# ╠═f710858e-b28a-436d-b851-e3a950fbb3f1
-# ╠═671c3591-6885-4c75-b16d-4221004bce39
-# ╠═ddae4873-f934-48e9-ba0e-00359dfbfe5f
-# ╟─352e3f48-a2d4-46aa-be32-c3d3a036ed84
-# ╟─78fcf3ae-cc69-4ff2-acc3-76732a9822a3
+# ╠═359367cc-7160-4e09-87b7-f8c08402cec7
+# ╠═660e32b2-f198-4b5f-b757-ad996376f922
+# ╠═5deb7a92-ff2e-49d6-bfec-df18979ef332
+# ╠═f9301106-c4a8-4229-8ba6-861a54de293a
+# ╟─b5d226c0-4c4e-47d5-8a44-36e97041cd7f
+# ╠═3aaa73c7-bf48-4d9c-8742-f919b3d2be27
+# ╠═0b5b587c-3519-44fe-a7d0-fc3e7e3dc939
+# ╠═8dc97195-9b7d-4498-ac08-56244985f6df
+# ╠═89cb7789-8c63-4974-9629-260f1f66cea0
+# ╠═bb44bd27-2860-4930-b9ac-f35286403676
+# ╠═4fa007f4-861a-4916-b2b5-4beb621ecdd0
+# ╠═35e831ce-236a-4a3a-9fce-1e27f0a3f8fc
+# ╟─17ab5fc0-25c3-4c7e-a867-425f8faa5219
+# ╠═9709cdbe-edd9-48b1-88bc-dbe257dcf058
+# ╠═e5846b20-937b-4d37-b9ff-4a8ead71e855
+# ╠═224f102a-9b19-43c5-9f56-7a1396e1af4f
+# ╠═cba4eeaf-54ba-40cc-a1ee-65fe79ace603
+# ╠═a978afa2-df14-4e33-88d4-40b87099baa8
+# ╟─56b87534-5533-407f-a719-ca824322fd8f
+# ╠═934da02e-a572-48ec-a0c7-ccb20d30695d
+# ╠═2111a899-69d1-478d-934c-66b81405f2ad
+# ╠═8a6f1907-fa78-4f20-b5ac-b4e990926d34
+# ╠═2d796543-fd87-431c-bffc-123fe7500a42
+# ╟─61448c86-3068-44ce-a21f-c215e1af5be3
+# ╠═713ef183-0e80-47fc-bd08-10a772dbfc83
+# ╠═1097bd8e-fa53-11ee-07ff-c7938ef41158
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
