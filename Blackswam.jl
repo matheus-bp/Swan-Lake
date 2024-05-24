@@ -17,6 +17,7 @@ end
 # ╔═╡ 713ef183-0e80-47fc-bd08-10a772dbfc83
 begin
 	using Plots
+	# using Makie
 	using PlutoUI
 end
 
@@ -38,11 +39,18 @@ md"""---"""
 # ╔═╡ bb44bd27-2860-4930-b9ac-f35286403676
 begin
 	Δ = function(arr,effective_zero = 1e-80)
-		Δ = ones(length(arr)) .* effective_zero
+		Δ =   [] #ones(length(arr)-1) .* effective_zero
+		Δ_f = zeros(0) #Vector{Float64}()
+		Δ_b = zeros(0) #Vector{Float64}()
 		for i in collect(2:1:length(arr))
-			Δ[i] = arr[i] - arr[i-1]
+			# Δ_f[i] = arr[i] - arr[i-1]
+			push!(Δ_f, arr[i]-arr[i-1])
 		end
-		Δ
+		for i in collect(1:1:length(arr)-1)
+			# Δ_b[i] = arr[i+1] - arr[i]
+			push!(Δ_b, arr[i+1]-arr[i])
+		end
+		Δ = (Δ_f .+ Δ_b)./2
 	end
 	
 	Δ_total = function(arr)
@@ -68,9 +76,12 @@ grid = collect(1:1:ND)
 # ╔═╡ 0b5b587c-3519-44fe-a7d0-fc3e7e3dc939
 begin
 	plot(grid,r0,bg=:black,label="")
-	xlabel!("depthpoints (I)")
+	xlabel!("depthpoints (L)")
 	ylabel!("radius (r) [Stellar radius]")
 end
+
+# ╔═╡ 6452c574-1667-44e6-99c3-46b87a1014c9
+hf_grid = collect(1.5:1:ND-0.5)
 
 # ╔═╡ 8a6f1907-fa78-4f20-b5ac-b4e990926d34
 function velo(r,v∞,β;v₀ = 0.01,Rstar=1)
@@ -88,7 +99,7 @@ plot(r0,v0,bg=:black,xaxis=:log,yaxis=:log,xlabel="r",ylabel="velocity (v)",labe
 
 # ╔═╡ 35e831ce-236a-4a3a-9fce-1e27f0a3f8fc
 begin
-	plot(grid,Δ(v0) ./ Δ(r0),bg=:black,marker=:circle,xlabel="I",ylabel="Δv/Δr",label="")
+	plot(hf_grid,Δ(v0) ./ Δ(r0),bg=:black,marker=:circle,xlabel="half-grid (hL)",ylabel="Δv/Δr",label="")
 	# hline!([Δ_total(v0)/Δ_total(r0)])
 end
 
@@ -96,12 +107,12 @@ end
 begin
 	r = copy(r0)
 	N_remap_grid = 100
-	for t in collect(1:1:N_remap_grid)
+	for t in collect(1:1:N_remap_grid) # number of re-map rounds
 		v = velo.(r,v∞,β)
 		ΔvΔr = abs.(Δ(v)./Δ(r))
-		iΔm = findfirst(x->x==maximum(ΔvΔr),ΔvΔr)  # index where Δv/Δr is maximum
-		# print(iΔm," ")
-		if iΔm != 1
+		iΔm = findfirst(x->x==maximum(ΔvΔr),ΔvΔr)  # find the index where Δv/Δr is maximum, i Δ m
+		print(iΔm," ")
+		#if iΔm != 1
 			if iΔm != 2
 				var_max = ((r[iΔm-1]-r[1])/(r[iΔm]-r[1]))
 				var = (var_max + 1)/2
@@ -113,7 +124,7 @@ begin
 			if var_max < 0.9
 				r[iΔm] = r[iΔm] * var
 			end
-		end
+		#end
 	end
 	r
 end
@@ -1341,6 +1352,7 @@ version = "1.4.1+1"
 # ╟─56b87534-5533-407f-a719-ca824322fd8f
 # ╠═934da02e-a572-48ec-a0c7-ccb20d30695d
 # ╠═2111a899-69d1-478d-934c-66b81405f2ad
+# ╠═6452c574-1667-44e6-99c3-46b87a1014c9
 # ╠═8a6f1907-fa78-4f20-b5ac-b4e990926d34
 # ╠═2d796543-fd87-431c-bffc-123fe7500a42
 # ╟─61448c86-3068-44ce-a21f-c215e1af5be3
